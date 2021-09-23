@@ -11,6 +11,6 @@ router.put("/:id", auth, rentals.update);
 
 router.delete("/:id", auth, rentals.delete);
 
-router.get("/:id", auth, rentals.getSingle);
+router.get("/:id", rentals.getSingle);
 
 module.exports = router;

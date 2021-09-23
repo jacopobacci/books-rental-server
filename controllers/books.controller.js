@@ -1,6 +1,7 @@
 const { Book } = require("../models/book.model");
 const { Genre } = require("../models/genre.model");
 const { Review } = require("../models/review.model");
+const { Rental } = require("../models/rental.model");
 
 exports.get = async (req, res) => {
   const books = await Book.find()
@@ -17,23 +18,23 @@ exports.get = async (req, res) => {
       },
     });
 
-  if (!books.length) return res.status(404).send("There aren't book anymore, add a new one!");
+  if (!books.length) return res.status(404).json({ message: "There aren't book anymore, add a new one!" });
 
-  res.send({ books });
+  res.status(200).json({ books });
 };
 
 exports.create = async (req, res) => {
   const { genre } = req.body;
 
   const foundGenre = await Genre.findOne({ name: genre });
-  if (!foundGenre) return res.status(400).send("Invalid genre.");
+  if (!foundGenre) return res.status(400).json({ message: "Invalid genre." });
 
   let book = await new Book(req.body);
   book.genre = foundGenre._id;
   book.user = req.user.userId;
   book = await book.save();
 
-  res.send({ book });
+  res.status(200).json({ book });
 };
 
 exports.update = async (req, res) => {
@@ -41,40 +42,42 @@ exports.update = async (req, res) => {
   const { genre } = req.body;
 
   const foundGenre = await Genre.findOne({ name: genre });
-  if (!foundGenre) return res.status(400).send("Invalid genre.");
+  if (!foundGenre) return res.status(400).json({ message: "Invalid genre." });
 
   const book = await Book.findByIdAndUpdate(
     id,
     { ...req.body, genre: { _id: foundGenre._id, name: foundGenre.name } },
     { new: true }
   );
-  if (!book) return res.status(404).send("The book with the given ID was not found.");
+  if (!book) return res.status(404).json({ message: "The book with the given ID was not found." });
 
-  res.send({ book });
+  res.status(200).json({ book });
 };
 
 exports.delete = async (req, res) => {
   const { id } = req.params;
 
   const book = await Book.findById(id);
-  if (!book) return res.status(404).send("The book with the given ID was not found.");
+  if (!book) return res.status(404).json({ message: "The book with the given ID was not found." });
 
   for (let r of book.reviews) {
     await Review.findByIdAndDelete(r);
   }
 
+  const rental = await Rental.deleteOne({ book: book._id });
+
   await Book.findByIdAndDelete(id);
 
-  res.send({ book });
+  res.status(200).json({ book });
 };
 
 exports.getSingle = async (req, res) => {
   const { id } = req.params;
   const book = await Book.findById(id).populate("genre").populate("user").exec();
 
-  if (!book) return res.status(404).send("Invalid book.");
+  if (!book) return res.status(404).json({ message: "Invalid book." });
 
-  res.send({ book });
+  res.status(200).json({ book });
 };
 
 exports.search = async (req, res) => {
@@ -85,7 +88,7 @@ exports.search = async (req, res) => {
     .populate("user", "-password -isAdmin")
     .populate("reviews", "-user -book");
 
-  if (!books) return res.status(404).send("Invalid search.");
+  if (!books) return res.status(404).json({ message: "Invalid search." });
 
-  res.send({ books });
+  res.status(200).json({ books });
 };

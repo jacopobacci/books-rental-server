@@ -7,14 +7,14 @@ exports.me = async (req, res) => {
 
   const customer = await Customer.findOne({ user: req.user.userId }).select("-user").populate("favouriteGenres");
 
-  res.send({ user, customer });
+  res.status(200).json({ user, customer });
 };
 
 exports.register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   let user = await User.findOne({ email });
-  if (user) return res.status(409).send("User already registered.");
+  if (user) return res.status(409).json({ message: "User already registered." });
 
   user = new User({ firstName, lastName, email, password });
   user.password = await bcrypt.hash(password, 10);
@@ -23,9 +23,5 @@ exports.register = async (req, res) => {
 
   const { _id } = user;
   const token = user.generateAuthToken();
-  res.send({ userId: _id, firstName, lastName, email, token });
+  res.status(200).json({ userId: _id, firstName, lastName, email, token });
 };
-
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
