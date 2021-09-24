@@ -50,7 +50,7 @@ exports.update = async (req, res) => {
     genreIds.push(foundGenre._id);
   }
 
-  const foundCustomer = await Customer.findOne({ "user._id": req.user.userId });
+  const foundCustomer = await Customer.findOne({ user: req.user.userId });
   if (!foundCustomer) return res.status(403).json({ error: "Unauthorized." });
 
   const customer = await Customer.findByIdAndUpdate(id, { ...req.body, favouriteGenres: genreIds }, { new: true });
@@ -63,7 +63,7 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   const { id } = req.params;
 
-  const foundCustomer = await Customer.findOne({ "user._id": req.user.userId });
+  const foundCustomer = await Customer.findOne({ user: req.user.userId });
   if (!foundCustomer) return res.status(403).json({ error: "Unauthorized." });
 
   const customer = await Customer.findByIdAndDelete(id);
