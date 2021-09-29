@@ -1,5 +1,6 @@
 const { Customer } = require("../models/customer.model");
 const { Genre } = require("../models/genre.model");
+const { Rental } = require("../models/rental.model");
 
 exports.get = async (req, res) => {
   const customers = await Customer.find()
@@ -68,6 +69,8 @@ exports.delete = async (req, res) => {
 
   const customer = await Customer.findByIdAndDelete(id);
   if (!customer) return res.status(404).json({ error: "The customer with the given ID was not found." });
+
+  await Rental.deleteOne({ customer: id });
 
   res.status(200).json({ customer });
 };

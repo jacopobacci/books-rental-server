@@ -56,8 +56,8 @@ exports.delete = async (req, res) => {
 
   const rental = await Rental.findById(id);
 
-  const foundRental = await Rental.findOne({ "customer.user._id": req.user.userId });
-  if (!foundRental) return res.status(403).json({ error: "Unauthorized." });
+  const foundRental = await Rental.findOne({ user: req.user.userId });
+  if (!foundRental) return res.status(403).json({ error: "Invalid rental." });
 
   await Book.findByIdAndUpdate(rental.book, { isAvailable: true }, { new: true });
 

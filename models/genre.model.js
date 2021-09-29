@@ -6,8 +6,6 @@ const genreSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    minlength: 5,
-    maxlength: 50,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

@@ -44,7 +44,7 @@ exports.update = async (req, res) => {
   const foundGenre = await Genre.findOne({ name: genre });
   if (!foundGenre) return res.status(400).json({ error: "Invalid genre." });
 
-  const foundBook = await Book.findOne({ "user._id": req.user.userId });
+  const foundBook = await Book.findOne({ user: req.user.userId });
   if (!foundBook) return res.status(403).json({ error: "Unauthorized." });
 
   const book = await Book.findByIdAndUpdate(
@@ -63,14 +63,14 @@ exports.delete = async (req, res) => {
   const book = await Book.findById(id);
   if (!book) return res.status(404).json({ error: "The book with the given ID was not found." });
 
-  const foundBook = await Book.findOne({ "user._id": req.user.userId });
+  const foundBook = await Book.findOne({ user: req.user.userId });
   if (!foundBook) return res.status(403).json({ error: "Unauthorized." });
 
   for (let r of book.reviews) {
     await Review.findByIdAndDelete(r);
   }
 
-  const rental = await Rental.deleteOne({ book: book._id });
+  await Rental.deleteOne({ book: book._id });
 
   await Book.findByIdAndDelete(id);
 
