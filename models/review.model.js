@@ -14,8 +14,6 @@ const Review = mongoose.model(
       content: {
         type: String,
         required: true,
-        minlength: 5,
-        maxlength: 512,
       },
       user: {
         type: mongoose.Schema.Types.ObjectId,
