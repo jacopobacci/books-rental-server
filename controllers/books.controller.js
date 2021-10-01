@@ -18,7 +18,7 @@ exports.get = async (req, res) => {
       },
     });
 
-  if (!books.length) return res.status(404).json({ error: "There aren't book anymore, add a new one!" });
+  if (!books.length) return res.status(404).json({ error: "There aren't still books..." });
 
   res.status(200).json({ books });
 };
@@ -92,7 +92,15 @@ exports.search = async (req, res) => {
     .sort("title")
     .populate("genre")
     .populate("user", "-password -isAdmin")
-    .populate("reviews", "-user -book");
+    .populate({
+      path: "reviews",
+      select: "-book",
+      populate: {
+        path: "user",
+        model: "User",
+        select: "firstName lastName",
+      },
+    });
 
   if (!books) return res.status(404).json({ error: "Invalid search." });
 

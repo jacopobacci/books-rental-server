@@ -3,6 +3,9 @@ const { Book } = require("../models/book.model");
 
 exports.get = async (req, res) => {
   const genres = await Genre.find().sort("name");
+
+  if (!genres.length) return res.status(404).json({ error: "There aren't still genres, add a new one!" });
+
   res.status(200).json({ genres });
 };
 
