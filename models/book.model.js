@@ -8,14 +8,10 @@ const Book = mongoose.model(
     title: {
       type: String,
       required: true,
-      minlength: 1,
-      maxlength: 50,
     },
     author: {
       type: String,
       required: true,
-      minlength: 1,
-      maxlength: 50,
     },
     image: {
       type: String,
@@ -34,8 +30,6 @@ const Book = mongoose.model(
     description: {
       type: String,
       required: true,
-      minlength: 5,
-      maxlength: 1024,
     },
     isAvailable: {
       type: Boolean,
