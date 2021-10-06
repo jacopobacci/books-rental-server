@@ -2,6 +2,7 @@ const { Book } = require("../models/book.model");
 const { Genre } = require("../models/genre.model");
 const { Review } = require("../models/review.model");
 const { Rental } = require("../models/rental.model");
+const { cloudinary } = require("../utils/cloudinary");
 
 exports.get = async (req, res) => {
   const books = await Book.find()
@@ -24,17 +25,35 @@ exports.get = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { genre } = req.body;
+  try {
+    const { genre } = req.body;
 
-  const foundGenre = await Genre.findOne({ name: genre });
-  if (!foundGenre) return res.status(400).json({ error: "Invalid genre." });
+    const foundGenre = await Genre.findOne({ name: genre });
+    if (!foundGenre) return res.status(400).json({ error: "Invalid genre." });
 
-  let book = await new Book(req.body);
-  book.genre = foundGenre._id;
-  book.user = req.user.userId;
-  book = await book.save();
+    const { imageUpload } = req.body;
 
-  res.status(200).json({ book });
+    if (imageUpload) {
+      const uploadResponse = await cloudinary.uploader.upload(imageUpload, {
+        upload_preset: "books-rental",
+        transformation: [{ width: 1000 }],
+      });
+
+      let book = await new Book({ ...req.body, imageUpload: uploadResponse.url });
+      book.genre = foundGenre._id;
+      book.user = req.user.userId;
+      book = await book.save();
+      res.status(200).json({ book });
+    } else {
+      let book = await new Book(req.body);
+      book.genre = foundGenre._id;
+      book.user = req.user.userId;
+      book = await book.save();
+      res.status(200).json({ book });
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 exports.update = async (req, res) => {

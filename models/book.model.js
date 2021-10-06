@@ -15,7 +15,9 @@ const Book = mongoose.model(
     },
     image: {
       type: String,
-      required: true,
+    },
+    imageUpload: {
+      type: String,
     },
     genre: {
       type: mongoose.Schema.Types.ObjectId,
@@ -47,10 +49,9 @@ const Book = mongoose.model(
 
 function validateBook(book) {
   const schema = Joi.object({
-    title: Joi.string().min(1).max(50).required(),
-    author: Joi.string().min(1).max(50).required(),
-    image: Joi.string().required(),
-    description: Joi.string().min(5).max(1024).required(),
+    title: Joi.string().required(),
+    author: Joi.string().required(),
+    description: Joi.string().required(),
     isAvailable: Joi.boolean(),
   }).options({ allowUnknown: true });
 
