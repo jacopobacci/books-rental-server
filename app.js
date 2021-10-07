@@ -35,7 +35,7 @@ process.on("unhandledRejection", (err) => {
   console.error(err.message, err);
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "20mb" }));
 app.use("/api/users", users);
 app.use("/api/auth", auth);
 app.use("/api/books", books);
