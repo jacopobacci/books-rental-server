@@ -38,8 +38,7 @@ exports.create = async (req, res) => {
         upload_preset: "books-rental",
         transformation: [{ width: 1000 }],
       });
-
-      let book = await new Book({ ...req.body, imageUpload: uploadResponse.url });
+      let book = await new Book({ ...req.body, imageUpload: uploadResponse.url, imageUploadId: uploadResponse.public_id });
       book.genre = foundGenre._id;
       book.user = req.user.userId;
       book = await book.save();
@@ -58,7 +57,7 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   const { id } = req.params;
-  const { genre } = req.body;
+  const { genre, imageUpload } = req.body;
 
   const foundGenre = await Genre.findOne({ name: genre });
   if (!foundGenre) return res.status(400).json({ error: "Invalid genre." });
@@ -66,14 +65,37 @@ exports.update = async (req, res) => {
   const foundBook = await Book.findOne({ user: req.user.userId });
   if (!foundBook) return res.status(403).json({ error: "Unauthorized." });
 
-  const book = await Book.findByIdAndUpdate(
-    id,
-    { ...req.body, genre: { _id: foundGenre._id, name: foundGenre.name } },
-    { new: true }
-  );
-  if (!book) return res.status(404).json({ error: "The book with the given ID was not found." });
-
-  res.status(200).json({ book });
+  if (imageUpload) {
+    if (foundBook.imageUploadId) {
+      cloudinary.uploader.destroy(foundBook.imageUploadId, function (result) {
+        console.log(result);
+      });
+    }
+    const uploadResponse = await cloudinary.uploader.upload(imageUpload, {
+      upload_preset: "books-rental",
+      transformation: [{ width: 1000 }],
+    });
+    const book = await Book.findByIdAndUpdate(
+      id,
+      {
+        ...req.body,
+        genre: { _id: foundGenre._id, name: foundGenre.name },
+        imageUpload: uploadResponse.url,
+        imageUploadId: uploadResponse.public_id,
+      },
+      { new: true }
+    );
+    if (!book) return res.status(404).json({ error: "The book with the given ID was not found." });
+    res.status(200).json({ book });
+  } else {
+    const book = await Book.findByIdAndUpdate(
+      id,
+      { ...req.body, genre: { _id: foundGenre._id, name: foundGenre.name } },
+      { new: true }
+    );
+    if (!book) return res.status(404).json({ error: "The book with the given ID was not found." });
+    res.status(200).json({ book });
+  }
 };
 
 exports.delete = async (req, res) => {
@@ -84,6 +106,12 @@ exports.delete = async (req, res) => {
 
   const foundBook = await Book.findOne({ user: req.user.userId });
   if (!foundBook) return res.status(403).json({ error: "Unauthorized." });
+
+  if (foundBook.imageUploadId) {
+    cloudinary.uploader.destroy(foundBook.imageUploadId, function (result) {
+      console.log(result);
+    });
+  }
 
   for (let r of book.reviews) {
     await Review.findByIdAndDelete(r);

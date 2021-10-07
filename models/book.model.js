@@ -19,6 +19,9 @@ const Book = mongoose.model(
     imageUpload: {
       type: String,
     },
+    imageUploadId: {
+      type: String,
+    },
     genre: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Genre",
