@@ -40,7 +40,6 @@ exports.update = async (req, res) => {
   const { id } = req.params;
 
   const { favouriteGenres } = req.body;
-  console.log(req.body);
 
   let genreIds = [];
 

@@ -3,17 +3,21 @@ const { Customer } = require("../models/customer.model");
 const { Book } = require("../models/book.model");
 
 exports.get = async (req, res) => {
-  const rentals = await Rental.find({})
-    .sort("-dateOut")
-    .populate({
-      path: "customer",
-      select: "-favouriteGenres",
-      populate: { path: "user", model: "User", select: "firstName lastName" },
-    })
-    .populate({ path: "book", select: "-reviews" });
-  if (!rentals.length) return res.status(404).json({ error: "There are no rentals at the moment." });
+  try {
+    const rentals = await Rental.find({})
+      .sort("-dateOut")
+      .populate({
+        path: "customer",
+        select: "-favouriteGenres",
+        populate: { path: "user", model: "User", select: "firstName lastName" },
+      })
+      .populate({ path: "book", select: "-reviews" });
+    if (!rentals.length) return res.status(404).json({ error: "There are no rentals at the moment." });
 
-  res.status(200).json({ rentals });
+    res.status(200).json({ rentals });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 exports.create = async (req, res) => {
